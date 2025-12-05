@@ -1,0 +1,24 @@
+# Xcode user data
+*.xcworkspace
+xcuserdata/
+*.xcuserstate
+
+# Build products
+DerivedData/
+build/
+
+# SwiftPM
+.build/
+Packages/
+Package.resolved
+
+# Logs and temporary files
+*.log
+*.tmp
+*.swp
+
+# macOS metadata
+.DS_Store
+
+# App-specific temp artifacts
+FCPPresence.log

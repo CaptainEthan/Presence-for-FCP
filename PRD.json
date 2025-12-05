@@ -1,0 +1,138 @@
+{
+  "product_name": "Presence for Final Cut Pro",
+  "version": "0.1",
+  "description": "A lightweight macOS background utility that automatically updates Discord Rich Presence with Final Cut Pro editing activity. Behaves exactly like 'Presence for VSCode' but for Final Cut Pro.",
+
+  "goals": {
+    "primary": "Automatically display editing status and project name from Final Cut Pro in Discord Rich Presence.",
+    "secondary": [
+      "Run silently in the background with minimal system overhead.",
+      "Instantly clear presence when Final Cut Pro is inactive or closed.",
+      "No UI setup, no configuration, and zero friction for users."
+    ],
+    "non_goals": [
+      "No analytics or user tracking.",
+      "No plugin inside Final Cut Pro.",
+      "No external servers, no cloud, no internet communication.",
+      "No settings window or complex GUI for the MVP."
+    ]
+  },
+
+  "platform": {
+    "os": "macOS 12+",
+    "language": "Swift 5+",
+    "distribution": "Standalone .app, downloadable and runnable like Presence for VSCode"
+  },
+
+  "dependencies": {
+    "swift_packages": [
+      {
+        "name": "DiscordRPC",
+        "url": "https://github.com/aeddi/DiscordRPC.git",
+        "reason": "Provides Discord Rich Presence via IPC to the Discord desktop client."
+      }
+    ]
+  },
+
+  "features": {
+    "auto_detect_fcp": {
+      "description": "Detect when Final Cut Pro is running and whether it is the frontmost active app.",
+      "bundle_id": "com.apple.FinalCut"
+    },
+
+    "window_title_parsing": {
+      "description": "Extract the project or timeline name from the Final Cut Pro window title.",
+      "fallback": "Timeline Active"
+    },
+
+    "discord_rpc": {
+      "description": "Send Rich Presence updates to the local Discord client using IPC.",
+      "fields": {
+        "details": "Editing in Final Cut Pro",
+        "state": "Project: <project_name>",
+        "timestamp": "Start of active editing session",
+        "large_image": "fcp_icon",
+        "large_image_text": "Final Cut Pro",
+        "small_image": "optional",
+        "small_image_text": "Editing"
+      }
+    },
+
+    "auto_clear_presence": {
+      "description": "Clear Discord presence when Final Cut Pro is closed, minimized, or no longer the frontmost app."
+    },
+
+    "performance": {
+      "cpu_target": "<1% average CPU usage",
+      "memory_target": "<50 MB RAM",
+      "poll_frequency_seconds": 1
+    }
+  },
+
+  "system_behavior": {
+    "event_loop": {
+      "interval_seconds": 1,
+      "steps": [
+        "Check if FCP is running",
+        "If FCP is active, read window title",
+        "Parse project name from window title",
+        "Update Discord RPC if data changed",
+        "If FCP inactive, clear presence"
+      ]
+    },
+    "fault_tolerance": [
+      "If Discord client is closed, retry connection silently.",
+      "If FCP crashes, clear presence within 3 seconds.",
+      "If window title is empty, use fallback state."
+    ]
+  },
+
+  "permissions": {
+    "required": [
+      "macOS Accessibility Permission (to read window titles)"
+    ],
+    "notes": "Permission prompt appears automatically when the app first attempts window introspection."
+  },
+
+  "architecture": {
+    "type": "background macOS app",
+    "description": "Runs silently with no UI. Uses AppDelegate for lifecycle and a timer-based loop.",
+    "components": [
+      "Swift AppDelegate main loop",
+      "Window title detector using Accessibility APIs",
+      "DiscordRPC client instance",
+      "Event loop and state management"
+    ]
+  },
+
+  "user_experience": {
+    "flow": [
+      "User downloads and opens the app.",
+      "macOS prompts for Accessibility permission.",
+      "App runs silently in the background.",
+      "User opens Final Cut Pro → Discord updates instantly.",
+      "User closes Final Cut Pro → Presence clears automatically."
+    ],
+    "ui": "None for MVP"
+  },
+
+  "success_criteria": {
+    "functional": [
+      "Discord presence updates within 1–2 seconds.",
+      "Project name accuracy above 95%.",
+      "Presence clears reliably when FCP is inactive."
+    ],
+    "technical": [
+      "App uses less than 1% CPU on average.",
+      "App runs indefinitely without memory leak."
+    ]
+  },
+
+  "future_enhancements": [
+    "Menu bar icon with status indicator.",
+    "Start-at-login toggle.",
+    "Manual edit mode (color grading, sound design).",
+    "Per-project presence themes.",
+    "Support for Premiere Pro or DaVinci Resolve."
+  ]
+}

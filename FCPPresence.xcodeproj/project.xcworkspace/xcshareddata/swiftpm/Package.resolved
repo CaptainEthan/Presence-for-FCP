@@ -1,0 +1,24 @@
+{
+  "originHash" : "f02b6dfb3dd4f56b30f81f101b4e1181ed809ef5cd98632e5f0e926135df69b9",
+  "pins" : [
+    {
+      "identity" : "bluesocket",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/IBM-Swift/BlueSocket.git",
+      "state" : {
+        "revision" : "7b23a867008e0027bfd6f4d398d44720707bc8ca",
+        "version" : "2.0.4"
+      }
+    },
+    {
+      "identity" : "discordrpc",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/aeddi/DiscordRPC.git",
+      "state" : {
+        "revision" : "b6a483eb7fd080878e1db35b4c367f7b69676a34",
+        "version" : "1.0.0"
+      }
+    }
+  ],
+  "version" : 3
+}

@@ -6,13 +6,30 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		55715CD92EE3276F00E9BB21 /* DiscordRPC in Frameworks */ = {isa = PBXBuildFile; productRef = 55715CD82EE3276F00E9BB21 /* DiscordRPC */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXFileReference section */
 		55715CC62EE326C400E9BB21 /* FCPPresence.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = FCPPresence.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		55715CFA2EE334F300E9BB21 /* Exceptions for "FCPPresence" folder in "FCPPresence" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = 55715CC52EE326C400E9BB21 /* FCPPresence */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
+
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		55715CC82EE326C400E9BB21 /* FCPPresence */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				55715CFA2EE334F300E9BB21 /* Exceptions for "FCPPresence" folder in "FCPPresence" target */,
+			);
 			path = FCPPresence;
 			sourceTree = "<group>";
 		};
@@ -23,6 +40,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				55715CD92EE3276F00E9BB21 /* DiscordRPC in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -65,6 +83,7 @@
 			);
 			name = FCPPresence;
 			packageProductDependencies = (
+				55715CD82EE3276F00E9BB21 /* DiscordRPC */,
 			);
 			productName = FCPPresence;
 			productReference = 55715CC62EE326C400E9BB21 /* FCPPresence.app */;
@@ -94,6 +113,9 @@
 			);
 			mainGroup = 55715CBD2EE326C400E9BB21;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				55715CD72EE3276F00E9BB21 /* XCRemoteSwiftPackageReference "DiscordRPC" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 55715CC72EE326C400E9BB21 /* Products */;
 			projectDirPath = "";
@@ -179,7 +201,7 @@
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
-				MACOSX_DEPLOYMENT_TARGET = 26.1;
+				MACOSX_DEPLOYMENT_TARGET = 12.0;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = YES;
@@ -237,7 +259,7 @@
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
-				MACOSX_DEPLOYMENT_TARGET = 26.1;
+				MACOSX_DEPLOYMENT_TARGET = 12.0;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
 				SDKROOT = macosx;
@@ -250,21 +272,26 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = 4A93B2CEZ3;
-				ENABLE_APP_SANDBOX = YES;
+				ENABLE_APP_SANDBOX = NO;
 				ENABLE_HARDENED_RUNTIME = YES;
 				ENABLE_USER_SELECTED_FILES = readonly;
-				GENERATE_INFOPLIST_FILE = YES;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = FCPPresence/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = "Presence for Final Cut Pro";
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.productivity";
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
-				INFOPLIST_KEY_NSMainStoryboardFile = Main;
-				INFOPLIST_KEY_NSPrincipalClass = NSApplication;
+				INFOPLIST_KEY_NSMainStoryboardFile = "";
+				INFOPLIST_KEY_NSPrincipalClass = "";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
+				MACOSX_DEPLOYMENT_TARGET = 12.0;
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = CPTEthan.FCPPresence;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -283,21 +310,26 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = 4A93B2CEZ3;
-				ENABLE_APP_SANDBOX = YES;
+				ENABLE_APP_SANDBOX = NO;
 				ENABLE_HARDENED_RUNTIME = YES;
 				ENABLE_USER_SELECTED_FILES = readonly;
-				GENERATE_INFOPLIST_FILE = YES;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = FCPPresence/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = "Presence for Final Cut Pro";
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.productivity";
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
-				INFOPLIST_KEY_NSMainStoryboardFile = Main;
-				INFOPLIST_KEY_NSPrincipalClass = NSApplication;
+				INFOPLIST_KEY_NSMainStoryboardFile = "";
+				INFOPLIST_KEY_NSPrincipalClass = "";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
+				MACOSX_DEPLOYMENT_TARGET = 12.0;
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = CPTEthan.FCPPresence;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -333,6 +365,25 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		55715CD72EE3276F00E9BB21 /* XCRemoteSwiftPackageReference "DiscordRPC" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/aeddi/DiscordRPC.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 1.0.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		55715CD82EE3276F00E9BB21 /* DiscordRPC */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 55715CD72EE3276F00E9BB21 /* XCRemoteSwiftPackageReference "DiscordRPC" */;
+			productName = DiscordRPC;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 55715CBE2EE326C400E9BB21 /* Project object */;
 }

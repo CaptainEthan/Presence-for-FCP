@@ -226,18 +226,33 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             return (nil, nil, nil)
         }
 
-        if let url = resolveRecentURL(from: plist["FFRecentProjects"]) {
-            let parsed = parseProjectInfo(from: url)
+        var libraryURL = resolveRecentURL(from: plist["FFActiveLibraries"] ?? plist["FFRecentLibraries"])
+        let projectURL = resolveRecentURL(from: plist["FFActiveProjects"] ?? plist["FFRecentProjects"])
+
+        if let projectURL {
+            var parsed = parseProjectInfo(from: projectURL)
+            if parsed.library == nil, let libURL = libraryURLFrom(projectURL) {
+                parsed.library = libURL.deletingPathExtension().lastPathComponent
+                libraryURL = libraryURL ?? libURL
+            }
+
+            if (parsed.event == nil || parsed.project == nil), let libURL = libraryURL {
+                let derived = deriveLatestProject(in: libURL)
+                parsed.event = parsed.event ?? derived.event
+                parsed.project = parsed.project ?? derived.project
+            }
+
             print("[Presence] Library: \(parsed.library ?? "")")
             print("[Presence] Event: \(parsed.event ?? "")")
             print("[Presence] Project: \(parsed.project ?? "")")
             return parsed
         }
 
-        if let libURL = resolveRecentURL(from: plist["FFActiveLibraries"] ?? plist["FFRecentLibraries"]) {
+        if let libURL = libraryURL {
             let name = libURL.deletingPathExtension().lastPathComponent
+            let derived = deriveLatestProject(in: libURL)
             print("[Presence] Detected FCP active library: \(name)")
-            return (name, nil, nil)
+            return (name, derived.event, derived.project)
         }
 
         print("[Presence] No recent projects found in plist")
@@ -325,6 +340,16 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         return nil
     }
 
+    private func libraryURLFrom(_ url: URL) -> URL? {
+        let components = url.pathComponents
+        guard let libIndex = components.lastIndex(where: { $0.hasSuffix(".fcpbundle") }) else {
+            return nil
+        }
+        let prefix = Array(components.prefix(libIndex + 1))
+        let path = NSString.path(withComponents: prefix)
+        return URL(fileURLWithPath: path, isDirectory: true)
+    }
+
     private func parseProjectInfo(from url: URL) -> (library: String?, event: String?, project: String?) {
         let urlNoExt = url.deletingPathExtension()
         let project = urlNoExt.lastPathComponent
@@ -347,6 +372,77 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         }
 
         return (library, event, project)
+    }
+
+    // Walk the active library bundle shallowly to find the most recently modified project
+    private func deriveLatestProject(in libraryURL: URL) -> (event: String?, project: String?) {
+        let fm = FileManager.default
+        var best: (Date, String?, String?)?
+        let ignoredTopLevel: Set<String> = [
+            "Original Media",
+            "Shared Items",
+            "Render Files",
+            "High Quality Media",
+            "High Quality Media.localized",
+            "Transcoded Media",
+            "Transcoded Media.localized",
+            "Analysis Files",
+            "Audio Waveforms",
+            "Backups",
+            ".lock",
+            ".lock-info",
+            "__Sync__",
+            "Settings.plist",
+            "CurrentVersion.plist",
+            "CurrentVersion.flexolibrary"
+        ]
+
+        guard let eventDirs = try? fm.contentsOfDirectory(
+            at: libraryURL,
+            includingPropertiesForKeys: [.isDirectoryKey, .contentModificationDateKey],
+            options: [.skipsHiddenFiles]
+        ) else {
+            return (nil, nil)
+        }
+
+        for eventURL in eventDirs {
+            var isDir: ObjCBool = false
+            guard fm.fileExists(atPath: eventURL.path, isDirectory: &isDir), isDir.boolValue else { continue }
+            let eventName = eventURL.lastPathComponent.replacingOccurrences(of: ".localized", with: "")
+            if ignoredTopLevel.contains(eventURL.lastPathComponent) { continue }
+
+            let eventFCPE = eventURL.appendingPathComponent("CurrentVersion.fcpevent")
+            if let attrs = try? fm.attributesOfItem(atPath: eventFCPE.path),
+               let date = attrs[.modificationDate] as? Date {
+                if best == nil || date > (best?.0 ?? .distantPast) {
+                    best = (date, eventName, nil)
+                }
+            }
+
+            if let projectDirs = try? fm.contentsOfDirectory(
+                at: eventURL,
+                includingPropertiesForKeys: [.isDirectoryKey, .contentModificationDateKey],
+                options: [.skipsHiddenFiles]
+            ) {
+                for projectURL in projectDirs {
+                    var isProjectDir: ObjCBool = false
+                    guard fm.fileExists(atPath: projectURL.path, isDirectory: &isProjectDir), isProjectDir.boolValue else { continue }
+                    let projectFCPE = projectURL.appendingPathComponent("CurrentVersion.fcpevent")
+                    if fm.fileExists(atPath: projectFCPE.path),
+                       let attrs = try? fm.attributesOfItem(atPath: projectFCPE.path),
+                       let date = attrs[.modificationDate] as? Date {
+                        if best == nil || date > (best?.0 ?? .distantPast) {
+                            best = (date, eventName, projectURL.lastPathComponent)
+                        }
+                    }
+                }
+            }
+        }
+
+        if let best = best {
+            return (best.1, best.2)
+        }
+        return (nil, nil)
     }
 
     private func log(_ message: String) {

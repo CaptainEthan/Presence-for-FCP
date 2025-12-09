@@ -7,14 +7,47 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		5522AEFD2EE3579900711F29 /* FinalCutPresenceExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 5522AEF02EE3579900711F29 /* FinalCutPresenceExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		55715CD92EE3276F00E9BB21 /* DiscordRPC in Frameworks */ = {isa = PBXBuildFile; productRef = 55715CD82EE3276F00E9BB21 /* DiscordRPC */; };
 /* End PBXBuildFile section */
 
+/* Begin PBXContainerItemProxy section */
+		5522AEFB2EE3579900711F29 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 55715CBE2EE326C400E9BB21 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 5522AEEF2EE3579900711F29;
+			remoteInfo = FinalCutPresenceExtension;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		5522AEFE2EE3579900711F29 /* Embed Foundation Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				5522AEFD2EE3579900711F29 /* FinalCutPresenceExtension.appex in Embed Foundation Extensions */,
+			);
+			name = "Embed Foundation Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
 /* Begin PBXFileReference section */
+		5522AEF02EE3579900711F29 /* FinalCutPresenceExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = FinalCutPresenceExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		55715CC62EE326C400E9BB21 /* FCPPresence.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = FCPPresence.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		5522AF022EE3579900711F29 /* Exceptions for "FinalCutPresenceExtension" folder in "FinalCutPresenceExtension" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = 5522AEEF2EE3579900711F29 /* FinalCutPresenceExtension */;
+		};
 		55715CFA2EE334F300E9BB21 /* Exceptions for "FCPPresence" folder in "FCPPresence" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
@@ -25,6 +58,14 @@
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
+		5522AEF12EE3579900711F29 /* FinalCutPresenceExtension */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				5522AF022EE3579900711F29 /* Exceptions for "FinalCutPresenceExtension" folder in "FinalCutPresenceExtension" target */,
+			);
+			path = FinalCutPresenceExtension;
+			sourceTree = "<group>";
+		};
 		55715CC82EE326C400E9BB21 /* FCPPresence */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
@@ -36,6 +77,13 @@
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
+		5522AEED2EE3579900711F29 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		55715CC32EE326C400E9BB21 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
@@ -51,6 +99,7 @@
 			isa = PBXGroup;
 			children = (
 				55715CC82EE326C400E9BB21 /* FCPPresence */,
+				5522AEF12EE3579900711F29 /* FinalCutPresenceExtension */,
 				55715CC72EE326C400E9BB21 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -59,6 +108,7 @@
 			isa = PBXGroup;
 			children = (
 				55715CC62EE326C400E9BB21 /* FCPPresence.app */,
+				5522AEF02EE3579900711F29 /* FinalCutPresenceExtension.appex */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -66,6 +116,28 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
+		5522AEEF2EE3579900711F29 /* FinalCutPresenceExtension */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 5522AF012EE3579900711F29 /* Build configuration list for PBXNativeTarget "FinalCutPresenceExtension" */;
+			buildPhases = (
+				5522AEEC2EE3579900711F29 /* Sources */,
+				5522AEED2EE3579900711F29 /* Frameworks */,
+				5522AEEE2EE3579900711F29 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				5522AEF12EE3579900711F29 /* FinalCutPresenceExtension */,
+			);
+			name = FinalCutPresenceExtension;
+			packageProductDependencies = (
+			);
+			productName = FinalCutPresenceExtension;
+			productReference = 5522AEF02EE3579900711F29 /* FinalCutPresenceExtension.appex */;
+			productType = "com.apple.product-type.app-extension";
+		};
 		55715CC52EE326C400E9BB21 /* FCPPresence */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = 55715CD42EE326C500E9BB21 /* Build configuration list for PBXNativeTarget "FCPPresence" */;
@@ -73,10 +145,12 @@
 				55715CC22EE326C400E9BB21 /* Sources */,
 				55715CC32EE326C400E9BB21 /* Frameworks */,
 				55715CC42EE326C400E9BB21 /* Resources */,
+				5522AEFE2EE3579900711F29 /* Embed Foundation Extensions */,
 			);
 			buildRules = (
 			);
 			dependencies = (
+				5522AEFC2EE3579900711F29 /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
 				55715CC82EE326C400E9BB21 /* FCPPresence */,
@@ -99,6 +173,9 @@
 				LastSwiftUpdateCheck = 2610;
 				LastUpgradeCheck = 2610;
 				TargetAttributes = {
+					5522AEEF2EE3579900711F29 = {
+						CreatedOnToolsVersion = 26.1.1;
+					};
 					55715CC52EE326C400E9BB21 = {
 						CreatedOnToolsVersion = 26.1.1;
 					};
@@ -122,11 +199,19 @@
 			projectRoot = "";
 			targets = (
 				55715CC52EE326C400E9BB21 /* FCPPresence */,
+				5522AEEF2EE3579900711F29 /* FinalCutPresenceExtension */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
+		5522AEEE2EE3579900711F29 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		55715CC42EE326C400E9BB21 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -137,6 +222,13 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
+		5522AEEC2EE3579900711F29 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		55715CC22EE326C400E9BB21 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -146,7 +238,121 @@
 		};
 /* End PBXSourcesBuildPhase section */
 
+/* Begin PBXTargetDependency section */
+		5522AEFC2EE3579900711F29 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 5522AEEF2EE3579900711F29 /* FinalCutPresenceExtension */;
+			targetProxy = 5522AEFB2EE3579900711F29 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
 /* Begin XCBuildConfiguration section */
+		5522AEFF2EE3579900711F29 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ADDITIONAL_SDKS = /Library/Developer/SDKs/WorkflowExtensionSDK.sdk;
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = FinalCutPresenceExtension/FinalCutPresenceExtension.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 4A93B2CEZ3;
+				ENABLE_HARDENED_RUNTIME = YES;
+				FRAMEWORK_SEARCH_PATHS = (
+					/Library/Frameworks,
+					"$(inherited)",
+				);
+				GENERATE_INFOPLIST_FILE = NO;
+				HEADER_SEARCH_PATHS = (
+					/usr/include,
+					"$(inherited)",
+				);
+				INFOPLIST_FILE = FinalCutPresenceExtension/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = FinalCutPresenceExtension;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				LD_ENTRY_POINT = _ProExtensionMain;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@executable_path/../../../../Frameworks",
+				);
+				LIBRARY_SEARCH_PATHS = (
+					/usr/lib,
+					"$(inherited)",
+				);
+				MACH_O_TYPE = mh_execute;
+				MACOSX_DEPLOYMENT_TARGET = 12.0;
+				MARKETING_VERSION = 1.0;
+				OTHER_LDFLAGS = (
+					"-fapplication-extension",
+					"-lProExtension",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = CPTEthan.FCPPresence.FinalCutPresenceExtension;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_OBJC_BRIDGING_HEADER = "FinalCutPresenceExtension/FinalCutPresenceExtension-Bridging-Header.h";
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				WRAPPER_EXTENSION = appex;
+			};
+			name = Debug;
+		};
+		5522AF002EE3579900711F29 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ADDITIONAL_SDKS = /Library/Developer/SDKs/WorkflowExtensionSDK.sdk;
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = FinalCutPresenceExtension/FinalCutPresenceExtension.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 4A93B2CEZ3;
+				ENABLE_HARDENED_RUNTIME = YES;
+				FRAMEWORK_SEARCH_PATHS = (
+					/Library/Frameworks,
+					"$(inherited)",
+				);
+				GENERATE_INFOPLIST_FILE = NO;
+				HEADER_SEARCH_PATHS = (
+					/usr/include,
+					"$(inherited)",
+				);
+				INFOPLIST_FILE = FinalCutPresenceExtension/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = FinalCutPresenceExtension;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				LD_ENTRY_POINT = _ProExtensionMain;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@executable_path/../../../../Frameworks",
+				);
+				LIBRARY_SEARCH_PATHS = (
+					/usr/lib,
+					"$(inherited)",
+				);
+				MACH_O_TYPE = mh_execute;
+				MACOSX_DEPLOYMENT_TARGET = 12.0;
+				MARKETING_VERSION = 1.0;
+				OTHER_LDFLAGS = (
+					"-fapplication-extension",
+					"-lProExtension",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = CPTEthan.FCPPresence.FinalCutPresenceExtension;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_OBJC_BRIDGING_HEADER = "FinalCutPresenceExtension/FinalCutPresenceExtension-Bridging-Header.h";
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				WRAPPER_EXTENSION = appex;
+			};
+			name = Release;
+		};
 		55715CD22EE326C500E9BB21 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -346,6 +552,15 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
+		5522AF012EE3579900711F29 /* Build configuration list for PBXNativeTarget "FinalCutPresenceExtension" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				5522AEFF2EE3579900711F29 /* Debug */,
+				5522AF002EE3579900711F29 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
 		55715CC12EE326C400E9BB21 /* Build configuration list for PBXProject "FCPPresence" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (

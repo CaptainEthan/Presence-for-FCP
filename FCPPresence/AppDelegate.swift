@@ -12,6 +12,9 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     private let pollInterval: TimeInterval = 1.0
     private let reconnectInterval: TimeInterval = 5.0
     private let presenceClearGrace: TimeInterval = 3.0
+    private let presenceToggleNotification = Notification.Name("com.ethanrogers.FCPPresence.toggle")
+    private let presenceRefreshNotification = Notification.Name("com.ethanrogers.FCPPresence.refresh")
+    private let presenceToggleKey = "enabled"
 
     private var rpc: DiscordRPC?
     private var isDiscordConnected = false
@@ -27,10 +30,19 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     private var lastProjectName: String?
     private var lastEventName: String?
     private var lastLibraryName: String?
+    private var lastClipName: String?
+    private var lastTimecode: String?
+    private var lastSnapshot: FCPActivitySnapshot?
+    private var lastTimelineUpdateAt: Date?
+    private var lastActiveBaseSignature: String?
+    private var presenceEnabled = true
+    private let minTimelineUpdateInterval: TimeInterval = 3.0
+    private let fcpMonitor = FCPActivityMonitor()
     private let logFileURL = URL(fileURLWithPath: NSTemporaryDirectory()).appendingPathComponent("FCPPresence.log")
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         NSApp.setActivationPolicy(.prohibited)
+        registerControlNotifications()
         prepareDiscordClient()
         timer = Timer.scheduledTimer(timeInterval: pollInterval,
                                      target: self,
@@ -47,7 +59,50 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         rpc?.disconnect()
     }
 
+    func startFCPDiscordRPC() {
+        presenceEnabled = true
+        lastPresenceSignature = nil
+        lastPresenceActive = false
+        poll()
+    }
+
+    func stopFCPDiscordRPC() {
+        presenceEnabled = false
+        clearPresence()
+        lastPresenceActive = false
+        lastPresenceSignature = nil
+        sessionStart = nil
+    }
+
+    private func registerControlNotifications() {
+        let center = DistributedNotificationCenter.default()
+        center.addObserver(self,
+                           selector: #selector(handlePresenceToggle(_:)),
+                           name: presenceToggleNotification,
+                           object: nil)
+        center.addObserver(self,
+                           selector: #selector(handlePresenceRefresh),
+                           name: presenceRefreshNotification,
+                           object: nil)
+    }
+
+    @objc private func handlePresenceToggle(_ notification: Notification) {
+        let enabled = (notification.userInfo?[presenceToggleKey] as? Bool) ?? true
+        log("Presence toggled \(enabled ? "on" : "off") via extension")
+        enabled ? startFCPDiscordRPC() : stopFCPDiscordRPC()
+    }
+
+    @objc private func handlePresenceRefresh() {
+        poll()
+    }
+
     @objc private func poll() {
+        guard presenceEnabled else {
+            clearPresence()
+            lastPresenceActive = false
+            lastPresenceSignature = nil
+            return
+        }
         connectDiscordIfNeeded()
 
         guard let fcpApp = NSRunningApplication.runningApplications(withBundleIdentifier: fcpBundleID).first else {
@@ -66,14 +121,21 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         lastFCPFrontmost = isFrontmost
         lastFCPSeenAt = Date()
 
+        let snapshot = fcpMonitor.fetchActiveContext() ?? getFCPActiveProjectInfo()
         if isFrontmost {
             sessionStart = sessionStart ?? Date()
-            let info = getFCPActiveProjectInfo()
-            let libraryName = info.library ?? "Unknown Library"
-            let eventName = info.event ?? "Unknown Event"
-            let projectName = info.project ?? "Timeline Active"
-            updateActivePresence(library: libraryName, event: eventName, project: projectName)
+            let activeSnapshot = snapshot ?? FCPActivitySnapshot(
+                library: "Final Cut Pro",
+                event: "Unknown Event",
+                project: "Timeline Active",
+                clipName: "Timeline Active",
+                timelineTimecode: nil,
+                resolution: nil,
+                frameRate: nil
+            )
+            updateActivePresence(with: activeSnapshot)
         } else {
+            if let snapshot { lastSnapshot = snapshot }
             updateIdlePresence()
         }
     }
@@ -121,30 +183,55 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         }
     }
 
-    private func updateActivePresence(library: String, event: String, project: String) {
+    private func updateActivePresence(with snapshot: FCPActivitySnapshot) {
         guard isDiscordConnected else { return }
-        let projectName = project.isEmpty ? "Timeline Active" : project
-        let libName = library.isEmpty ? "Unknown Library" : library
-        let eventName = event.isEmpty ? "Unknown Event" : event
-        let signature = "active|\(libName)|\(eventName)|\(projectName)"
+        let projectName = snapshot.project?.isEmpty == false ? snapshot.project! : "Timeline Active"
+        let libName = snapshot.library?.isEmpty == false ? snapshot.library! : "Unknown Library"
+        let eventName = snapshot.event?.isEmpty == false ? snapshot.event! : "Unknown Event"
+        let clipName = snapshot.clipName?.isEmpty == false ? snapshot.clipName! : projectName
+        let now = Date()
 
-        if lastPresenceActive, lastPresenceSignature == signature { return }
+        let baseSignature = "active|\(libName)|\(eventName)|\(projectName)|\(clipName)"
+        let signature = "\(baseSignature)|\(snapshot.timelineTimecode ?? "-")"
+        let timecodeChanged = snapshot.timelineTimecode != nil && snapshot.timelineTimecode != lastTimecode
+        let timelineThrottled = timecodeChanged && now.timeIntervalSince(lastTimelineUpdateAt ?? .distantPast) < minTimelineUpdateInterval
 
-        if lastPresenceSignature != signature {
-            sessionStart = Date()
-        }
+        if timelineThrottled { return }
+        if lastPresenceActive, lastPresenceSignature == signature, !timecodeChanged { return }
+
+        sessionStart = sessionStart ?? Date()
 
         do {
+            var details = "Editing: \(clipName)"
+            if let tc = snapshot.timelineTimecode {
+                details += " — \(tc)"
+            }
+
+            var stateParts = ["Event: \(eventName)", "Library: \(libName)"]
+            if let res = snapshot.resolution, !res.isEmpty {
+                stateParts.append(res)
+            }
+            if let fps = snapshot.frameRate, !fps.isEmpty {
+                stateParts.append("\(fps) fps")
+            }
+
             try rpc?.setPresence(
-                details: "Editing: \(projectName)",
-                state: "Event: \(eventName) | Library: \(libName)",
+                details: details,
+                state: stateParts.joined(separator: " • "),
                 startTimestamp: sessionStart
             )
             lastProjectName = projectName
             lastEventName = eventName
             lastLibraryName = libName
+            lastClipName = clipName
+            if timecodeChanged {
+                lastTimecode = snapshot.timelineTimecode
+                lastTimelineUpdateAt = now
+            }
+            lastSnapshot = snapshot
             lastPresenceSignature = signature
             lastPresenceActive = true
+            lastActiveBaseSignature = baseSignature
             log("Presence updated: \(signature)")
         } catch {
             isDiscordConnected = false
@@ -159,15 +246,19 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         let signature = "IDLE"
         if lastPresenceActive, lastPresenceSignature == signature { return }
 
-        let project = lastProjectName ?? "Inactive"
-        let event = lastEventName ?? "Idle"
-        let library = lastLibraryName ?? "Final Cut Pro"
+        if sessionStart == nil {
+            sessionStart = Date()
+        }
+        let project = lastSnapshot?.project ?? lastProjectName ?? "Inactive"
+        let event = lastSnapshot?.event ?? lastEventName ?? "Idle"
+        let library = lastSnapshot?.library ?? lastLibraryName ?? "Final Cut Pro"
+        let clip = lastSnapshot?.clipName ?? project
 
         do {
             try rpc?.setPresence(
                 details: "Final Cut Pro",
-                state: "Idle (\(project)) • Event: \(event) • Library: \(library)",
-                startTimestamp: nil
+                state: "Idle (\(clip)) • Event: \(event) • Library: \(library)",
+                startTimestamp: sessionStart
             )
             lastPresenceSignature = signature
             lastPresenceActive = true
@@ -194,6 +285,11 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         lastPresenceSignature = nil
         sessionStart = nil
         lastFCPSeenAt = nil
+        lastTimecode = nil
+        lastTimelineUpdateAt = nil
+        lastSnapshot = nil
+        lastClipName = nil
+        lastActiveBaseSignature = nil
         log("Presence cleared")
     }
 
@@ -210,20 +306,20 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         clearPresence()
     }
 
-    func getFCPActiveProjectInfo() -> (library: String?, event: String?, project: String?) {
+    func getFCPActiveProjectInfo() -> FCPActivitySnapshot? {
         let containerPath = ("~/Library/Containers/com.apple.FinalCut/Data/Library/Preferences/com.apple.FinalCut.plist" as NSString).expandingTildeInPath
         let legacyPath = ("~/Library/Preferences/com.apple.FinalCut.plist" as NSString).expandingTildeInPath
         let prefsPath = FileManager.default.fileExists(atPath: containerPath) ? containerPath : legacyPath
 
         guard let data = try? Data(contentsOf: URL(fileURLWithPath: prefsPath)) else {
             print("[Presence] Could not read Final Cut preferences")
-            return (nil, nil, nil)
+            return nil
         }
 
         var format = PropertyListSerialization.PropertyListFormat.binary
         guard let plist = try? PropertyListSerialization.propertyList(from: data, options: [], format: &format) as? [String: Any] else {
             print("[Presence] Failed to decode plist")
-            return (nil, nil, nil)
+            return nil
         }
 
         var libraryURL = resolveRecentURL(from: plist["FFActiveLibraries"] ?? plist["FFRecentLibraries"])
@@ -245,18 +341,34 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             print("[Presence] Library: \(parsed.library ?? "")")
             print("[Presence] Event: \(parsed.event ?? "")")
             print("[Presence] Project: \(parsed.project ?? "")")
-            return parsed
+            return FCPActivitySnapshot(
+                library: parsed.library,
+                event: parsed.event,
+                project: parsed.project,
+                clipName: parsed.project,
+                timelineTimecode: nil,
+                resolution: nil,
+                frameRate: nil
+            )
         }
 
         if let libURL = libraryURL {
             let name = libURL.deletingPathExtension().lastPathComponent
             let derived = deriveLatestProject(in: libURL)
             print("[Presence] Detected FCP active library: \(name)")
-            return (name, derived.event, derived.project)
+            return FCPActivitySnapshot(
+                library: name,
+                event: derived.event,
+                project: derived.project,
+                clipName: derived.project,
+                timelineTimecode: nil,
+                resolution: nil,
+                frameRate: nil
+            )
         }
 
         print("[Presence] No recent projects found in plist")
-        return (nil, nil, nil)
+        return nil
     }
 
     // Read recent FCP project info from Final Cut preferences (FFRecentProjects/FFRecentLibraries)
@@ -350,24 +462,41 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         return URL(fileURLWithPath: path, isDirectory: true)
     }
 
+    private func normalizeProjectURL(_ url: URL) -> URL {
+        let last = url.lastPathComponent
+        if last == "CurrentVersion" || last.hasPrefix("CurrentVersion.") {
+            return url.deletingLastPathComponent()
+        }
+        return url
+    }
+
     private func parseProjectInfo(from url: URL) -> (library: String?, event: String?, project: String?) {
-        let urlNoExt = url.deletingPathExtension()
-        let project = urlNoExt.lastPathComponent
-        let components = urlNoExt.pathComponents
+        let normalizedURL = normalizeProjectURL(url)
+        let components = normalizedURL.pathComponents
 
         var library: String?
         var event: String?
+        var project: String?
 
         if let libIndex = components.lastIndex(where: { $0.hasSuffix(".fcpbundle") }) {
             library = components[libIndex].replacingOccurrences(of: ".fcpbundle", with: "")
             let nextIndex = libIndex + 1
-            if nextIndex < components.count - 1 {
+            if nextIndex < components.count {
                 let candidate = components[nextIndex]
                 if candidate != "Projects.localized" {
-                    event = candidate
-                } else if nextIndex + 1 < components.count - 1 {
-                    event = components[nextIndex + 1]
+                    event = candidate.replacingOccurrences(of: ".localized", with: "")
+                } else if nextIndex + 1 < components.count {
+                    event = components[nextIndex + 1].replacingOccurrences(of: ".localized", with: "")
                 }
+            }
+
+            if let projectsIndex = components.lastIndex(of: "Projects.localized"), projectsIndex + 1 < components.count {
+                project = URL(fileURLWithPath: components[projectsIndex + 1]).deletingPathExtension().lastPathComponent
+            } else if let last = components.last,
+                      last != "Projects.localized",
+                      last != components[libIndex],
+                      event.map({ last != $0 }) ?? true {
+                project = URL(fileURLWithPath: last).deletingPathExtension().lastPathComponent
             }
         }
 
@@ -405,6 +534,20 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             return (nil, nil)
         }
 
+        func considerProject(at projectURL: URL, eventName: String, best: inout (Date, String?, String?)?) {
+            var isProjectDir: ObjCBool = false
+            guard fm.fileExists(atPath: projectURL.path, isDirectory: &isProjectDir), isProjectDir.boolValue else { return }
+            let projectFCPE = projectURL.appendingPathComponent("CurrentVersion.fcpevent")
+            if fm.fileExists(atPath: projectFCPE.path),
+               let attrs = try? fm.attributesOfItem(atPath: projectFCPE.path),
+               let date = attrs[.modificationDate] as? Date {
+                let projectName = projectURL.deletingPathExtension().lastPathComponent
+                if best == nil || date > (best?.0 ?? .distantPast) {
+                    best = (date, eventName, projectName)
+                }
+            }
+        }
+
         for eventURL in eventDirs {
             var isDir: ObjCBool = false
             guard fm.fileExists(atPath: eventURL.path, isDirectory: &isDir), isDir.boolValue else { continue }
@@ -425,16 +568,19 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                 options: [.skipsHiddenFiles]
             ) {
                 for projectURL in projectDirs {
-                    var isProjectDir: ObjCBool = false
-                    guard fm.fileExists(atPath: projectURL.path, isDirectory: &isProjectDir), isProjectDir.boolValue else { continue }
-                    let projectFCPE = projectURL.appendingPathComponent("CurrentVersion.fcpevent")
-                    if fm.fileExists(atPath: projectFCPE.path),
-                       let attrs = try? fm.attributesOfItem(atPath: projectFCPE.path),
-                       let date = attrs[.modificationDate] as? Date {
-                        if best == nil || date > (best?.0 ?? .distantPast) {
-                            best = (date, eventName, projectURL.lastPathComponent)
+                    if projectURL.lastPathComponent == "Projects.localized" {
+                        if let nestedProjects = try? fm.contentsOfDirectory(
+                            at: projectURL,
+                            includingPropertiesForKeys: [.isDirectoryKey, .contentModificationDateKey],
+                            options: [.skipsHiddenFiles]
+                        ) {
+                            for nested in nestedProjects {
+                                considerProject(at: nested, eventName: eventName, best: &best)
+                            }
                         }
+                        continue
                     }
+                    considerProject(at: projectURL, eventName: eventName, best: &best)
                 }
             }
         }

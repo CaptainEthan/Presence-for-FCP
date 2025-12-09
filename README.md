@@ -1,12 +1,13 @@
 # Presence for Final Cut Pro
 
-Presence for Final Cut Pro is a lightweight macOS background agent that mirrors your Final Cut Pro activity to Discord Rich Presence. It reads Final Cut Pro’s preference data to surface the active Library, Event, and Project, and publishes them over Discord IPC using the [`aeddi/DiscordRPC`](https://github.com/aeddi/DiscordRPC) Swift package.
+Presence for Final Cut Pro is a lightweight macOS background agent plus a Final Cut Pro workflow extension that mirrors your editing activity to Discord Rich Presence. It reads live context from Final Cut Pro’s Professional Video Applications APIs (library/event/project/clip/timecode) with a prefs fallback, and publishes them over Discord IPC using the [`aeddi/DiscordRPC`](https://github.com/aeddi/DiscordRPC) Swift package.
 
 ## Features
-- Headless background-only app (no UI, no menu bar icon).
+- Headless background agent (no Dock/menu bar icon) with an in-app Final Cut Pro Workflow Extension UI (toggle + Refresh + live context readout).
 - 1-second polling with state-change-only updates to keep CPU under 1% and memory light.
-- Uses Final Cut Pro prefs (`FFActiveProjects` / `FFActiveLibraries`, with fallbacks to recent entries) to obtain the current Library/Event/Project.
-- Automatically reconnects to Discord; clears presence within 3 seconds if Final Cut Pro closes or crashes.
+- Uses the Professional Video Applications APIs for current library/event/project/clip and timeline timecode; falls back to Final Cut prefs (`FFActiveProjects` / `FFActiveLibraries`) when host data is unavailable.
+- Discord presence includes clip/project name, library/event, optional resolution/fps, and timeline timecode.
+- Session timer persists while Final Cut Pro stays open (no reset when going idle); presence clears within 3 seconds if Final Cut Pro closes or crashes.
 - Safe fallbacks when data is unavailable (`Unknown Library`, `Unknown Event`, `Timeline Active`).
 
 ## Requirements
@@ -18,8 +19,9 @@ Presence for Final Cut Pro is a lightweight macOS background agent that mirrors 
 ## Installation & Build
 1. Open `FCPPresence.xcodeproj` in Xcode.
 2. Update the Discord client ID in `FCPPresence/AppDelegate.swift` (`discordClientID` constant) if you use your own Discord application.
-3. Select a signing team for the `FCPPresence` target if required.
+3. Select a signing team for both targets (`FCPPresence` and `FinalCutPresenceExtension`) if required.
 4. Build and run the `FCPPresence` scheme. The app launches as a background agent (no Dock icon).
+5. In Final Cut Pro, open **Window → Extensions → Presence** to show the workflow extension UI. Use the toggle to enable/disable presence and the Refresh button to request an immediate update; the panel shows the current Library/Event/Project/timecode detected from the host APIs.
 
 ### Adding the Discord RPC art assets
 1. In the [Discord Developer Portal](https://discord.com/developers/applications), open your application.
@@ -32,14 +34,14 @@ Presence for Final Cut Pro is a lightweight macOS background agent that mirrors 
 
 ## How it works
 - A 1-second `Timer` checks whether Final Cut Pro is running and frontmost.
-- Active presence is built from Final Cut Pro prefs:
-  - Primary sources: `FFActiveProjects` (bookmark URLs) and `FFActiveLibraries`.
+- Active presence is built from the Professional Video Applications workflow APIs when available (`FCPXLibrary` / `FCPXEvent` / `FCPXProject`), pulling library/event/project/clip and timeline timecode. If unavailable, it falls back to Final Cut prefs:
+  - Primary prefs sources: `FFActiveProjects` (bookmark URLs) and `FFActiveLibraries`.
   - Fallbacks: `FFRecentProjects` / `FFRecentLibraries`.
   - If only a library is known, the app scans that library bundle for the most recently modified `CurrentVersion.fcpevent` to infer Event and Project.
 - Discord Rich Presence payload:
-  - `details`: `Editing: <project>`
-  - `state`: `Event: <event> | Library: <library>`
-  - `timestamps.start`: Session start time
+  - `details`: `Editing: <clip or project>` (includes timecode when available)
+  - `state`: `Event: <event> • Library: <library> • <resolution?> • <fps?>`
+  - `timestamps.start`: Session start time (persists while Final Cut Pro stays open)
   - `assets.large_image`: `fcp`
   - `assets.large_text`: `Final Cut Pro`
 - When Final Cut Pro is not frontmost, the presence switches to Idle using the last-known names; presence is cleared after a short grace period if Final Cut Pro closes.
